@@ -1,0 +1,48 @@
+# 
+- name: Uninstall old version Docker 
+  apt :
+    name : '{{ item }}'
+    state: absent
+  with_items: 
+    - docker 
+    - docker-engine 
+    - docker.io 
+    - containerd 
+    - runc
+#
+- name: Install Docker's dependencies
+  apt :
+    name : '{{ item }}'
+    state : present
+    update_cache: yes
+  with_items:
+    - ca-certificates
+    - curl 
+    - gnupg 
+    - lsb-release
+    - python3-pip
+#
+- name: Add Docker GPG apt Key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Set up official Docker's repository
+  apt_repository:
+    repo: "deb [arch={{ ansible_architecture }}] https://download.docker.com/linux/{% if ansible_distribution == 'Ubuntu' %}ubuntu{% elif ansible_distribution == 'Debian' %}debian{% endif %} {{ ansible_distribution_release }} stable"
+    state: present
+
+- name: Install Docker Engine
+  apt :
+    name : '{{ item }}'
+    state: present
+    update_cache: yes
+  with_items: 
+    - docker-ce
+    - docker-ce-cli 
+    - containerd.io 
+    - docker-compose-plugin
+
+- name: Install docker pip
+  pip:  
+    name: docker

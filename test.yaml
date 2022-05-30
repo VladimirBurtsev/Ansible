@@ -1,0 +1,5 @@
+- hosts: #host
+  #connection: local
+  become: yes
+  roles:
+  - role: Docker_install
