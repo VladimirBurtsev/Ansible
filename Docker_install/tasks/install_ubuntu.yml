@@ -22,14 +22,24 @@
     - lsb-release
     - python3-pip
 #
+- name: Create directory /etc/apt/keyrings
+  file:
+    state: directory
+    path: /etc/apt/keyrings
+
 - name: Add Docker GPG apt Key
   apt_key:
     url: https://download.docker.com/linux/ubuntu/gpg
     state: present
+    keyring: /etc/apt/keyrings/docker.gpg
+
+- name: Get DEB architecture
+  shell: dpkg --print-architecture
+  register: deb_architecture
 
 - name: Set up official Docker's repository
   apt_repository:
-    repo: "deb [arch={{ ansible_architecture }}] https://download.docker.com/linux/{% if ansible_distribution == 'Ubuntu' %}ubuntu{% elif ansible_distribution == 'Debian' %}debian{% endif %} {{ ansible_distribution_release }} stable"
+    repo: "deb [arch={{ deb_architecture.stdout }} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/{% if ansible_distribution == 'Ubuntu' %}ubuntu{% elif ansible_distribution == 'Debian' %}debian{% endif %} {{ ansible_distribution_release }} stable"
     state: present
 
 - name: Install Docker Engine
